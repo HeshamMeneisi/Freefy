@@ -118,5 +118,17 @@ namespace Freefy.Properties {
                 this["ClarifaiAPIKey"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int RecCap {
+            get {
+                return ((int)(this["RecCap"]));
+            }
+            set {
+                this["RecCap"] = value;
+            }
+        }
     }
 }

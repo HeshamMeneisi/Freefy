@@ -49,10 +49,17 @@ namespace Freefy
                     break;
             }
         }
+
+        internal static async Task<int> GetRecommended(Image img, Image[] matches)
+        {
+            return await CurrentLabeler.GetRecommendedMatch(img, matches);
+        }
     }
 
     class ClarifaiLabeler : ImageLabeler
     {
+        public bool CanRecommend => false;
+
         ClarifaiClient client;
         public ClarifaiLabeler()
         {
@@ -88,10 +95,17 @@ namespace Freefy
 
             return results;
         }
+
+        public Task<int> GetRecommendedMatch(Image img, Image[] matches)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class DummyLabeler : ImageLabeler
     {
+        public bool CanRecommend => false;
+
         public async Task<Dictionary<string, double>> GetLabelsAsync(string url)
         {
             return new Dictionary<string, double>() {
@@ -111,10 +125,17 @@ namespace Freefy
                 {"a", 0.75 }
             };
         }
+
+        public Task<int> GetRecommendedMatch(Image img, Image[] matches)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class FlaskLabeler : ImageLabeler
     {
+        public bool CanRecommend => true;
+
         public async Task<Dictionary<string, double>> GetLabelsAsync(string url)
         {
             return await ServerProxy.GetPredictions(url);
@@ -123,6 +144,11 @@ namespace Freefy
         public async Task<Dictionary<string, double>> GetLabelsAsync(Image img)
         {
             return await ServerProxy.GetPredictions(img);
+        }
+
+        public async Task<int> GetRecommendedMatch(Image img, Image[] matches)
+        {
+            return await ServerProxy.GetRecommended(img, matches);
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Utilities
             }
         }
 
-        internal static async Task<T> GetResponseAsync<T>(string host, string apiPath, Image img)
+        internal static async Task<T> GetResponseAsync<T>(string host, string apiPath, Image img, string token = null)
         {
             try
             {
@@ -77,13 +77,15 @@ namespace Utilities
                 using (var stream = await httpWebRequest.GetRequestStreamAsync())
                 {
                     byte[] bytes = Helper.GetImageBytes(img);
+                    if (token != null)
+                        stream.Write(Encoding.ASCII.GetBytes(token), 0, Encoding.ASCII.GetByteCount(token));
                     stream.Write(bytes, 0, bytes.Length);
                     stream.Flush();
                     stream.Close();
                 }
 
                 var resp = httpWebRequest.GetResponse();
-                
+
                 var respJson = new StreamReader(resp.GetResponseStream()).ReadToEnd();
 
                 var obj = JObject.Parse(respJson);

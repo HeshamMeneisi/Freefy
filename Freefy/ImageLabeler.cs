@@ -8,5 +8,8 @@ namespace Freefy
     {
         Task<Dictionary<string, double>> GetLabelsAsync(string url);
         Task<Dictionary<string, double>> GetLabelsAsync(Image img);
+        Task<int> GetRecommendedMatch(Image img, Image[] matches);
+
+        bool CanRecommend { get; }
     }
 }

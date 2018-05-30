@@ -26,5 +26,8 @@
     <Setting Name="ClarifaiAPIKey" Type="System.String" Scope="User">
       <Value Profile="(Default)">a9242b9fba1c48e99d68200dfa4f34a4</Value>
     </Setting>
+    <Setting Name="RecCap" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

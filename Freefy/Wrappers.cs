@@ -106,12 +106,16 @@ namespace Freefy
             while (retrievingLabels) ;
             if (retrievingSimilar || labels == null) return;
             retrievingSimilar = true;
-            await ImageLookup.GetSimilar(labels.Keys.ToArray(), (imgUrl, size) =>
+            await ImageLookup.GetSimilar(labels.Keys.ToArray(), async (imgUrl, size) =>
             {
                 if (imgUrl == null)
                 {
-                    retrievingSimilar = false;
                     similarRetrieved = true;
+                                    
+                    if (Labeler.CurrentLabeler.CanRecommend)
+                        SetSelectedMatch(await Labeler.GetRecommended(img, matches.Take(Settings.Default.RecCap).Select(i=>i.GetFullImage()).ToArray()));
+
+                    retrievingSimilar = false;
                     return;
                 }
                 //if (size.Width < Settings.Default.MinWidth && size.Height < Settings.Default.MinHeight) return;
