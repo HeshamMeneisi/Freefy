@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Freefy.Properties;
+using System;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Freefy
 {
@@ -11,12 +13,16 @@ namespace Freefy
         {
             InitializeComponent();
             urlGrid.DataSource = urls;
-            imgList.DataSource = current_images;
 
             urls.AllowNew = urls.AllowEdit = urls.AllowRemove = true;
 
             Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             iconBox.Image = appIcon.ToBitmap();
+
+            mWidth.Text = Settings.Default.MinWidth.ToString();
+            mHeight.Text = Settings.Default.MinHeight.ToString();
+
+            Labeler.Reset();
         }
 
         #region Window
@@ -89,6 +95,7 @@ namespace Freefy
         private void clearCache_Click(object sender, EventArgs e)
         {
             WebBrowserHelper.ClearCache();
+            Cache.Clear();
         }
 
         private async void clearUrl_Click(object sender, EventArgs e)
@@ -101,10 +108,51 @@ namespace Freefy
 
         private void mWidth_TextChanged(object sender, EventArgs e)
         {
-            var t = (TextBox)sender;
+            var t = (ToolStripTextBox)sender;
             int i;
             while (!int.TryParse(t.Text, out i))
-                t.Text = t.Text.Substring(0, t.Text.Length - 1);
+                if (t.Text == "")
+                    if (t.Name == "mWidth")
+                        t.Text = Settings.Default.MinWidth.ToString();
+                    else
+                        t.Text = Settings.Default.MinHeight.ToString();
+                else
+                    t.Text = t.Text.Substring(0, t.Text.Length - 1);
+            if (t.Name == "mWidth")
+                Settings.Default.MinWidth = i;
+            else
+                Settings.Default.MinHeight = i;
+            Settings.Default.Save();
+        }
+
+        private async void matchGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            if (matchGrid.SelectedRows.Count == 1)
+                await SetSelectedMatch(matchGrid.SelectedRows[0].Index);
+        }
+
+        private void pickMatch_Click(object sender, EventArgs e)
+        {
+            if (selectedMatchIndex > -1)
+            {
+                var w = urls[selectedUrlIndex].GetChildren()[selectedImgIndex];
+                w.SetSelectedMatch(selectedMatchIndex);
+            }
+        }
+
+        private void sveURLBtn_Click(object sender, EventArgs e)
+        {
+            SaveCurrentURL();
+        }
+
+        private void loadMissing_Click(object sender, EventArgs e)
+        {
+            LoadMissing();
+        }
+
+        private void settingsBtn_Click(object sender, EventArgs e)
+        {
+            (new settingsFrm()).ShowDialog(this);
         }
 
         private async void urlGrid_SelectionChanged(object sender, EventArgs e)

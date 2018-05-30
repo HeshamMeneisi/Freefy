@@ -1,6 +1,7 @@
 ﻿using Clarifai.API;
 using Clarifai.DTOs.Inputs;
 using Clarifai.DTOs.Predictions;
+using Freefy.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,15 +13,54 @@ using Utilities;
 
 namespace Freefy
 {
+    class Labeler
+    {
+        public enum Method { ByImage = 0, ByUrl = 1 }
+
+        public enum LabelerType { DummyLabeler = 0, FlaskLabeler = 1, ClarifaiLabeler = 2 }
+
+        public static Method PreferredMethod = Method.ByImage;
+
+        public static ImageLabeler CurrentLabeler = new DummyLabeler();
+
+        public static async Task<Dictionary<string, double>> GetLabelsAsync(string url)
+        {
+            return await CurrentLabeler.GetLabelsAsync(url);
+        }
+
+        public static async Task<Dictionary<string, double>> GetLabelsAsync(Image img)
+        {
+            return await CurrentLabeler.GetLabelsAsync(img);
+        }
+
+        internal static void Reset()
+        {
+            PreferredMethod = (Method)Settings.Default.APIMethod;
+            switch ((LabelerType)Settings.Default.APIType)
+            {
+                case LabelerType.FlaskLabeler:
+                    CurrentLabeler = new FlaskLabeler();
+                    break;
+                case LabelerType.ClarifaiLabeler:
+                    CurrentLabeler = new ClarifaiLabeler();
+                    break;
+                default:
+                    CurrentLabeler = new DummyLabeler();
+                    break;
+            }
+        }
+    }
+
     class ClarifaiLabeler : ImageLabeler
     {
+        ClarifaiClient client;
         public ClarifaiLabeler()
         {
+            client = new ClarifaiClient(Settings.Default.ClarifaiAPIKey);
         }
 
         public async Task<Dictionary<string, double>> GetLabelsAsync(string url)
         {
-            ClarifaiClient client = new ClarifaiClient("a9242b9fba1c48e99d68200dfa4f34a4");
             var res = await client.PublicModels.GeneralModel
                .Predict(new ClarifaiURLImage(url))
                .ExecuteAsync();
@@ -35,13 +75,8 @@ namespace Freefy
 
         public async Task<Dictionary<string, double>> GetLabelsAsync(Image img)
         {
-            ClarifaiClient client = new ClarifaiClient("a9242b9fba1c48e99d68200dfa4f34a4");
-            byte[] bytes;
-            using (var ms = new MemoryStream())
-            {
-                img.Save(ms, img.RawFormat);
-                bytes = ms.ToArray();
-            }
+            byte[] bytes = Helper.GetImageBytes(img);
+
             var res = await client.PublicModels.GeneralModel
                .Predict(new ClarifaiFileImage(bytes))
                .ExecuteAsync();
@@ -87,12 +122,7 @@ namespace Freefy
 
         public async Task<Dictionary<string, double>> GetLabelsAsync(Image img)
         {
-            return new Dictionary<string, double>() {
-                {"is", 0.8 },
-                {"this", 0.9 },
-                {"dummy", 0.70 },
-                {"a", 0.75 }
-            };
+            return await ServerProxy.GetPredictions(img);
         }
     }
 }

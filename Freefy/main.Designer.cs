@@ -30,12 +30,18 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainFrm));
             this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.statusText = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.urlGrid = new System.Windows.Forms.DataGridView();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.openBtn = new System.Windows.Forms.ToolStripButton();
-            this.clearCache = new System.Windows.Forms.ToolStripButton();
             this.clearUrl = new System.Windows.Forms.ToolStripButton();
+            this.clearCache = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.loadMissing = new System.Windows.Forms.ToolStripButton();
+            this.sveURLBtn = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.settingsBtn = new System.Windows.Forms.ToolStripButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.imgList = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -49,11 +55,13 @@
             this.button2 = new System.Windows.Forms.Button();
             this.closeBtn = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.pickMatch = new System.Windows.Forms.Button();
+            this.matchPrev = new System.Windows.Forms.PictureBox();
+            this.matchGrid = new System.Windows.Forms.DataGridView();
             this.splitContainerTop = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.labelsText = new System.Windows.Forms.RichTextBox();
             this.imgPrev = new System.Windows.Forms.PictureBox();
-            this.statusText = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusStrip.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.urlGrid)).BeginInit();
@@ -63,6 +71,9 @@
             this.toolStrip1.SuspendLayout();
             this.topPan.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.iconBox)).BeginInit();
+            this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.matchPrev)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.matchGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerTop)).BeginInit();
             this.splitContainerTop.Panel1.SuspendLayout();
             this.splitContainerTop.Panel2.SuspendLayout();
@@ -76,13 +87,22 @@
             // 
             // statusStrip
             // 
+            this.statusStrip.BackColor = System.Drawing.Color.Gray;
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusText});
-            this.statusStrip.Location = new System.Drawing.Point(0, 576);
+            this.statusStrip.Location = new System.Drawing.Point(0, 507);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(814, 22);
             this.statusStrip.TabIndex = 0;
             this.statusStrip.Text = "Status";
+            // 
+            // statusText
+            // 
+            this.statusText.BackColor = System.Drawing.Color.Gray;
+            this.statusText.ForeColor = System.Drawing.Color.White;
+            this.statusText.Name = "statusText";
+            this.statusText.Size = new System.Drawing.Size(26, 17);
+            this.statusText.Text = "Idle";
             // 
             // groupBox1
             // 
@@ -99,8 +119,10 @@
             // urlGrid
             // 
             this.urlGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.urlGrid.BackgroundColor = System.Drawing.Color.DeepSkyBlue;
             this.urlGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.urlGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.urlGrid.GridColor = System.Drawing.Color.DarkOrange;
             this.urlGrid.Location = new System.Drawing.Point(3, 41);
             this.urlGrid.Name = "urlGrid";
             this.urlGrid.Size = new System.Drawing.Size(394, 151);
@@ -109,10 +131,16 @@
             // 
             // toolStrip2
             // 
+            this.toolStrip2.BackColor = System.Drawing.Color.LightGray;
             this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openBtn,
             this.clearUrl,
-            this.clearCache});
+            this.clearCache,
+            this.toolStripSeparator1,
+            this.loadMissing,
+            this.sveURLBtn,
+            this.toolStripSeparator2,
+            this.settingsBtn});
             this.toolStrip2.Location = new System.Drawing.Point(3, 16);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(394, 25);
@@ -129,6 +157,16 @@
             this.openBtn.Text = "Open File";
             this.openBtn.Click += new System.EventHandler(this.openBtn_Click);
             // 
+            // clearUrl
+            // 
+            this.clearUrl.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.clearUrl.Image = ((System.Drawing.Image)(resources.GetObject("clearUrl.Image")));
+            this.clearUrl.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.clearUrl.Name = "clearUrl";
+            this.clearUrl.Size = new System.Drawing.Size(23, 22);
+            this.clearUrl.Text = "Re-Scrap URL";
+            this.clearUrl.Click += new System.EventHandler(this.clearUrl_Click);
+            // 
             // clearCache
             // 
             this.clearCache.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -139,15 +177,45 @@
             this.clearCache.Text = "Clear Cache";
             this.clearCache.Click += new System.EventHandler(this.clearCache_Click);
             // 
-            // clearUrl
+            // toolStripSeparator1
             // 
-            this.clearUrl.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.clearUrl.Image = ((System.Drawing.Image)(resources.GetObject("clearUrl.Image")));
-            this.clearUrl.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.clearUrl.Name = "clearUrl";
-            this.clearUrl.Size = new System.Drawing.Size(23, 22);
-            this.clearUrl.Text = "Reload Images";
-            this.clearUrl.Click += new System.EventHandler(this.clearUrl_Click);
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // loadMissing
+            // 
+            this.loadMissing.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.loadMissing.Image = ((System.Drawing.Image)(resources.GetObject("loadMissing.Image")));
+            this.loadMissing.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.loadMissing.Name = "loadMissing";
+            this.loadMissing.Size = new System.Drawing.Size(23, 22);
+            this.loadMissing.Text = "Load Missing";
+            this.loadMissing.Click += new System.EventHandler(this.loadMissing_Click);
+            // 
+            // sveURLBtn
+            // 
+            this.sveURLBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.sveURLBtn.Image = ((System.Drawing.Image)(resources.GetObject("sveURLBtn.Image")));
+            this.sveURLBtn.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.sveURLBtn.Name = "sveURLBtn";
+            this.sveURLBtn.Size = new System.Drawing.Size(23, 22);
+            this.sveURLBtn.Text = "Save URL";
+            this.sveURLBtn.Click += new System.EventHandler(this.sveURLBtn_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // settingsBtn
+            // 
+            this.settingsBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.settingsBtn.Image = ((System.Drawing.Image)(resources.GetObject("settingsBtn.Image")));
+            this.settingsBtn.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.settingsBtn.Name = "settingsBtn";
+            this.settingsBtn.Size = new System.Drawing.Size(23, 22);
+            this.settingsBtn.Text = "Settings";
+            this.settingsBtn.Click += new System.EventHandler(this.settingsBtn_Click);
             // 
             // groupBox2
             // 
@@ -165,8 +233,10 @@
             // 
             this.imgList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.imgList.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.imgList.BackgroundColor = System.Drawing.Color.DeepSkyBlue;
             this.imgList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.imgList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imgList.GridColor = System.Drawing.Color.DarkOrange;
             this.imgList.Location = new System.Drawing.Point(3, 41);
             this.imgList.Name = "imgList";
             this.imgList.Size = new System.Drawing.Size(404, 151);
@@ -175,6 +245,7 @@
             // 
             // toolStrip1
             // 
+            this.toolStrip1.BackColor = System.Drawing.Color.LightGray;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.mWidth,
@@ -291,13 +362,55 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.pickMatch);
+            this.groupBox3.Controls.Add(this.matchPrev);
+            this.groupBox3.Controls.Add(this.matchGrid);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(539, 342);
+            this.groupBox3.Size = new System.Drawing.Size(539, 273);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Matches";
+            // 
+            // pickMatch
+            // 
+            this.pickMatch.BackColor = System.Drawing.Color.Orange;
+            this.pickMatch.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pickMatch.Enabled = false;
+            this.pickMatch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.pickMatch.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.pickMatch.ForeColor = System.Drawing.Color.White;
+            this.pickMatch.Location = new System.Drawing.Point(291, 227);
+            this.pickMatch.Name = "pickMatch";
+            this.pickMatch.Size = new System.Drawing.Size(245, 43);
+            this.pickMatch.TabIndex = 2;
+            this.pickMatch.Text = "Pick This!";
+            this.pickMatch.UseVisualStyleBackColor = false;
+            this.pickMatch.Click += new System.EventHandler(this.pickMatch_Click);
+            // 
+            // matchPrev
+            // 
+            this.matchPrev.Dock = System.Windows.Forms.DockStyle.Top;
+            this.matchPrev.Location = new System.Drawing.Point(291, 16);
+            this.matchPrev.Name = "matchPrev";
+            this.matchPrev.Size = new System.Drawing.Size(245, 211);
+            this.matchPrev.TabIndex = 1;
+            this.matchPrev.TabStop = false;
+            // 
+            // matchGrid
+            // 
+            this.matchGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.matchGrid.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.matchGrid.BackgroundColor = System.Drawing.Color.DeepSkyBlue;
+            this.matchGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.matchGrid.Dock = System.Windows.Forms.DockStyle.Left;
+            this.matchGrid.GridColor = System.Drawing.Color.DarkOrange;
+            this.matchGrid.Location = new System.Drawing.Point(3, 16);
+            this.matchGrid.Name = "matchGrid";
+            this.matchGrid.Size = new System.Drawing.Size(288, 254);
+            this.matchGrid.TabIndex = 0;
+            this.matchGrid.SelectionChanged += new System.EventHandler(this.matchGrid_SelectionChanged);
             // 
             // splitContainerTop
             // 
@@ -330,41 +443,37 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.groupBox3);
-            this.splitContainer2.Size = new System.Drawing.Size(814, 342);
+            this.splitContainer2.Size = new System.Drawing.Size(814, 273);
             this.splitContainer2.SplitterDistance = 271;
             this.splitContainer2.TabIndex = 8;
             // 
             // labelsText
             // 
+            this.labelsText.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.labelsText.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelsText.ForeColor = System.Drawing.Color.Lime;
             this.labelsText.Location = new System.Drawing.Point(0, 0);
             this.labelsText.Name = "labelsText";
             this.labelsText.ReadOnly = true;
-            this.labelsText.Size = new System.Drawing.Size(271, 112);
+            this.labelsText.Size = new System.Drawing.Size(271, 71);
             this.labelsText.TabIndex = 1;
             this.labelsText.Text = "";
             // 
             // imgPrev
             // 
             this.imgPrev.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.imgPrev.Location = new System.Drawing.Point(0, 112);
+            this.imgPrev.Location = new System.Drawing.Point(0, 71);
             this.imgPrev.Name = "imgPrev";
-            this.imgPrev.Size = new System.Drawing.Size(271, 230);
+            this.imgPrev.Size = new System.Drawing.Size(271, 202);
             this.imgPrev.TabIndex = 0;
             this.imgPrev.TabStop = false;
-            // 
-            // statusText
-            // 
-            this.statusText.Name = "statusText";
-            this.statusText.Size = new System.Drawing.Size(26, 17);
-            this.statusText.Text = "Idle";
             // 
             // MainFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(814, 598);
+            this.ClientSize = new System.Drawing.Size(814, 529);
             this.Controls.Add(this.splitContainer2);
             this.Controls.Add(this.splitContainerTop);
             this.Controls.Add(this.statusStrip);
@@ -388,6 +497,9 @@
             this.topPan.ResumeLayout(false);
             this.topPan.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.iconBox)).EndInit();
+            this.groupBox3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.matchPrev)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.matchGrid)).EndInit();
             this.splitContainerTop.Panel1.ResumeLayout(false);
             this.splitContainerTop.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerTop)).EndInit();
@@ -418,7 +530,6 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.SplitContainer splitContainerTop;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.RichTextBox labelsText;
         private System.Windows.Forms.PictureBox imgPrev;
         private System.Windows.Forms.DataGridView imgList;
         private System.Windows.Forms.ToolStripButton clearCache;
@@ -429,6 +540,15 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
         private System.Windows.Forms.ToolStripTextBox mHeight;
         private System.Windows.Forms.ToolStripStatusLabel statusText;
+        private System.Windows.Forms.DataGridView matchGrid;
+        private System.Windows.Forms.Button pickMatch;
+        private System.Windows.Forms.PictureBox matchPrev;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton sveURLBtn;
+        private System.Windows.Forms.RichTextBox labelsText;
+        private System.Windows.Forms.ToolStripButton loadMissing;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton settingsBtn;
     }
 }
 

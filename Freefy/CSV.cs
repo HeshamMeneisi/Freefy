@@ -25,20 +25,21 @@ namespace CSV
             using (var sr = new StreamReader(File.OpenRead(path)))
             {
                 line = sr.ReadLine();
-                string[] columns = line.Split(',').Skip(1).ToArray();
+                string[] columns = line.Split(',').ToArray();
                 while (!sr.EndOfStream)
                 {
                     try
                     {
                         line = sr.ReadLine();
-                        string[] values = line.Split(',').Skip(1).ToArray();
+                        string[] values = line.Split(',');
+
                         if (values.Length == 0)
                             continue;
-                        if (commentStart != null && values[0].StartsWith(commentStart))
-                            continue;
+                        
                         dict = new Dictionary<string, string>();
                         for (int i = 0; i < columns.Length; i++)
-                            dict[columns[i]] = values[i];
+                            if (commentStart == null || dict[columns[i]].StartsWith(commentStart))
+                                dict[columns[i]] = values[i];
                     }
                     catch (Exception ex)
                     {

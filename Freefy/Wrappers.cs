@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Freefy.Properties;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -9,21 +11,6 @@ using Utilities;
 
 namespace Freefy
 {
-    class Labeler
-    {
-        static ImageLabeler labeler = new DummyLabeler();
-
-        public static async Task<Dictionary<string, double>> GetLabelsAsync(string url)
-        {
-            return await labeler.GetLabelsAsync(url);
-        }
-
-        public static async Task<Dictionary<string, double>> GetLabelsAsync(Image img)
-        {
-            return await labeler.GetLabelsAsync(img);
-        }
-    }
-
     class URLWrapper
     {
 
@@ -34,7 +21,7 @@ namespace Freefy
 
         private string[] keys = new string[] { "url", "URL", "Url" };
 
-        private List<ImageWrapper> children;
+        private BindingList<ImageWrapper> children;
 
         public URLWrapper(Dictionary<string, string> row)
         {
@@ -59,13 +46,7 @@ namespace Freefy
 
         public URLWrapper() { }
 
-        public void SetChildren(List<ImageWrapper> children)
-        {
-            this.children = children;
-            ChildrenUpdated?.Invoke(this);
-        }
-
-        public List<ImageWrapper> GetChildren()
+        public BindingList<ImageWrapper> GetChildren()
         {
             return children;
         }
@@ -73,7 +54,7 @@ namespace Freefy
         internal void AddChild(ImageWrapper w)
         {
             if (children == null)
-                children = new List<ImageWrapper>();
+                children = new BindingList<ImageWrapper>();
             children.Add(w);
             ChildrenUpdated?.Invoke(this);
         }
@@ -82,35 +63,68 @@ namespace Freefy
     class ImageWrapper : URLWrapper
     {
         public event WrapperUpdatedEventHandler ImageUpdated;
+        public event WrapperUpdatedEventHandler SimilarFound;
 
-        static int P_DIM = 50;
+        static int P_DIM = 80;
 
         private Image img;
 
         public Image ImagePreview { get; private set; }
 
-        private Dictionary<string, double> Labels;
+        private Dictionary<string, double> labels;
+
+        bool similarRetrieved = false;
+        private BindingList<ImageWrapper> matches = new BindingList<ImageWrapper>();
+        private int selectedMatch = 0;
 
         public ImageWrapper(string url) : base(url)
         {
             RetrieveImage();
-            RetrieveLabels();
         }
         bool retrievingLabels = false;
         public async Task RetrieveLabels()
         {
-            if(retrievingLabels) return;
+            if (retrievingLabels) return;
             retrievingLabels = true;
             try
             {
-                Labels = await Labeler.GetLabelsAsync(URL);
-                foreach (var k in Labels.Keys)
-                    Debug.WriteLine(k + " " + Labels[k]);
+                if (Labeler.PreferredMethod == Labeler.Method.ByUrl)
+                    labels = await Labeler.GetLabelsAsync(URL);
+                else if (img != null)
+                    labels = await Labeler.GetLabelsAsync(img);
+
+                if (labels != null)
+                    labels = labels.OrderByDescending(kv => kv.Value)
+                        .Take(Settings.Default.NFirstLabels)
+                        .ToDictionary(kv => kv.Key, kv => kv.Value);
             }
-            catch(Exception ex) { Reporter.Report(ex); }
+            catch (Exception ex) { Reporter.Report(ex); }
             finally { retrievingLabels = false; }
         }
-
+        public async Task RetrieveMatches()
+        {
+            while (retrievingLabels) ;
+            if (retrievingSimilar || labels == null) return;
+            retrievingSimilar = true;
+            await ImageLookup.GetSimilar(labels.Keys.ToArray(), (imgUrl, size) =>
+            {
+                if (imgUrl == null)
+                {
+                    retrievingSimilar = false;
+                    similarRetrieved = true;
+                    return;
+                }
+                //if (size.Width < Settings.Default.MinWidth && size.Height < Settings.Default.MinHeight) return;
+                ImageWrapper iw;
+                if (!Cache.Lookup(imgUrl, out iw))
+                {
+                    iw = new ImageWrapper(imgUrl);
+                    Cache.Stash(imgUrl, iw);
+                }
+                matches.Add(iw);
+                SimilarFound?.Invoke(this);
+            });
+        }
         public ImageWrapper(string url, Image img) : base(url)
         {
             this.img = img;
@@ -130,10 +144,12 @@ namespace Freefy
 
         public Dictionary<string, double> GetLabels()
         {
-            return Labels;
+            return labels;
         }
 
         bool retrievingImage;
+        private bool retrievingSimilar;
+
         public async Task RetrieveImage()
         {
             if (retrievingImage) return;
@@ -143,19 +159,18 @@ namespace Freefy
                 HttpHelper.TryGetImage(URL, out img);
                 UpdatePreview();
                 ImageUpdated?.Invoke(this);
+                retrievingImage = false;
             }
             catch
             {
                 ImageScraper.TryGetImage(URL, (bmp) =>
                  {
+                     if (bmp == null) return;
                      img = bmp;
                      UpdatePreview();
                      ImageUpdated?.Invoke(this);
+                     retrievingImage = false;
                  });
-            }
-            finally
-            {
-                retrievingImage = false;
             }
         }
 
@@ -177,6 +192,32 @@ namespace Freefy
                 }
                 ImagePreview = img.GetThumbnailImage((int)w, (int)h, null, IntPtr.Zero);
             }
+        }
+
+        internal BindingList<ImageWrapper> GetMatches()
+        {
+            return matches;
+        }
+
+        internal bool HasRetrievedMatches()
+        {
+            return similarRetrieved;
+        }
+
+        public int GetSelectedMatchIndex()
+        {
+            return selectedMatch;
+        }
+
+        public void SetSelectedMatch(int idx)
+        {
+            if (idx < matches.Count && idx >= 0)
+                selectedMatch = idx;
+        }
+
+        internal ImageWrapper GetSelectedMatch()
+        {
+            return matches[selectedMatch];
         }
     }
 }

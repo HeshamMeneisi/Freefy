@@ -17,7 +17,9 @@ namespace Freefy
 
         public static async Task GetImageURLs(string url, Action<string, Size> callback)
         {
+            Debug.WriteLine("Waiting " + url);
             jobInProgress.Acquire();
+            Debug.WriteLine("Access " + url);
 
             browser = new ExtendedWebBrowser
             {
@@ -50,6 +52,7 @@ namespace Freefy
                 }
                 finally
                 {
+                    callback(null, new Size(0, 0));
                     browser.DisableEvents("PageLoaded");
                     jobInProgress.Release();
                 }
@@ -79,9 +82,10 @@ namespace Freefy
 
         public static void TryGetImage(string url, Action<Bitmap> callback)
         {
-            Debug.WriteLine("Waiting");
+            Debug.WriteLine("Waiting " + url);
             jobInProgress.Acquire();
-            Debug.WriteLine("Access");
+            Debug.WriteLine("Access " + url);
+
             browser = new ExtendedWebBrowser
             {
                 Dock = DockStyle.Fill,
@@ -89,45 +93,51 @@ namespace Freefy
             };
             browser.PageLoaded += (s, e) =>
             {
-               try
-               {
-                   urlText.Text = e.Url.ToString();
-                   if (HasCaptcha())
-                   {
-                       if (MessageBox.Show("Captcha detected! Please solve it to load pages from this website.", "Captcha") == DialogResult.OK)
-                           ShowPreview();
-                   }
-                   else
-                   {
-                       var images = browser.Document.Images;
-                       if (images.Count > 0)
-                       {
-                           var el = images[0];
-                           var d = browser.Dock;
-                           var en = browser.ScrollBarsEnabled;
-                           browser.Dock = DockStyle.None;
-                           browser.ScrollBarsEnabled = false;
-                           browser.Document.Body.Style = "overflow:hidden";
-                           browser.Size = el.ClientRectangle.Size + new Size(50, 50);
-                           Bitmap temp = new Bitmap(browser.Width, browser.Height);
-                           browser.DrawToBitmap(temp, new Rectangle(0, 0, temp.Width, temp.Height));
-                           Bitmap bmp = new Bitmap(temp.Width - 50, temp.Height - 60);
-                           Graphics gfx = Graphics.FromImage(bmp);
-                           gfx.DrawImage(temp, new Rectangle(0, 0, bmp.Width, bmp.Height), new Rectangle(10, 20, bmp.Width, bmp.Height), GraphicsUnit.Pixel);
-                           gfx.Dispose();
-                           //string path = Path.GetTempFileName();
-                           //bmp.Save(path);
-                           browser.Dock = d;
-                           browser.ScrollBarsEnabled = en;
-                           callback(bmp);
-                       }
-                   }
-               }
-               finally
-               {
-                   browser.DisableEvents("PageLoaded");
-                   jobInProgress.Release();
-               }
+                try
+                {
+                    urlText.Text = e.Url.ToString();
+                    if (HasCaptcha())
+                    {
+                        if (MessageBox.Show("Captcha detected! Please solve it to load pages from this website.", "Captcha") == DialogResult.OK)
+                            ShowPreview();
+                    }
+                    else
+                    {
+                        var images = browser.Document.Images;
+                        if (images.Count > 0)
+                        {
+                            var el = images[0];
+                            var d = browser.Dock;
+                            var en = browser.ScrollBarsEnabled;
+                            browser.Dock = DockStyle.None;
+                            browser.ScrollBarsEnabled = false;
+                            browser.Document.Body.Style = "overflow:hidden";
+                            browser.Size = el.ClientRectangle.Size + new Size(50, 50);
+                            Bitmap temp = new Bitmap(browser.Width, browser.Height);
+                            browser.DrawToBitmap(temp, new Rectangle(0, 0, temp.Width, temp.Height));
+                            Bitmap bmp = new Bitmap(temp.Width - 50, temp.Height - 60);
+                            Graphics gfx = Graphics.FromImage(bmp);
+                            gfx.DrawImage(temp, new Rectangle(0, 0, bmp.Width, bmp.Height), new Rectangle(10, 20, bmp.Width, bmp.Height), GraphicsUnit.Pixel);
+                            gfx.Dispose();
+                            //string path = Path.GetTempFileName();
+                            //bmp.Save(path);
+                            browser.Dock = d;
+                            browser.ScrollBarsEnabled = en;
+                            callback(bmp);
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
+                finally
+                {
+                    callback(null);
+                    browser.DisableEvents("PageLoaded");
+                    Debug.WriteLine("Done " + url);
+                    jobInProgress.Release();
+                }
             };
             browser.Navigate(url);
         }

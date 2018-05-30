@@ -46,5 +46,77 @@ namespace Freefy.Properties {
                 this["LookupQuery"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int NFirstLabels {
+            get {
+                return ((int)(this["NFirstLabels"]));
+            }
+            set {
+                this["NFirstLabels"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int MinWidth {
+            get {
+                return ((int)(this["MinWidth"]));
+            }
+            set {
+                this["MinWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int MinHeight {
+            get {
+                return ((int)(this["MinHeight"]));
+            }
+            set {
+                this["MinHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int APIMethod {
+            get {
+                return ((int)(this["APIMethod"]));
+            }
+            set {
+                this["APIMethod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int APIType {
+            get {
+                return ((int)(this["APIType"]));
+            }
+            set {
+                this["APIType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("a9242b9fba1c48e99d68200dfa4f34a4")]
+        public string ClarifaiAPIKey {
+            get {
+                return ((string)(this["ClarifaiAPIKey"]));
+            }
+            set {
+                this["ClarifaiAPIKey"] = value;
+            }
+        }
     }
 }
