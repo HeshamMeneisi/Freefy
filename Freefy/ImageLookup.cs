@@ -19,7 +19,7 @@ namespace Freefy
             string urlQuery = HttpUtility.UrlEncode(String.Join(" ", labels));
             string url = String.Format(Settings.Default.LookupQuery, urlQuery);
 
-            await ImageScraper.GetImageURLs(url, callback);
+            ImageScraper.GetImageURLs(url, callback);
         }
     }
 }

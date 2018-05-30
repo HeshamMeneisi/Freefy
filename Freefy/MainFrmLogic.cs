@@ -44,6 +44,10 @@ namespace Freefy
                 var m = matches[index];
                 matchPrev.Image = m.GetThumb(matchPrev.Width, matchPrev.Height);
                 selectedMatchIndex = index;
+
+                foreach (DataGridViewRow row in matchGrid.Rows)
+                    row.Selected = row.Index == index;
+
                 pickMatch.Enabled = true;
             }
             matchGrid.Enabled = true;
@@ -64,25 +68,17 @@ namespace Freefy
                 {
                     imgPrev.Image = w.GetThumb(imgPrev.Width, imgPrev.Height);
                 }
-                if (w.GetLabels() == null)
+                if (!w.HasRetrievedLabels())
                     await w.RetrieveLabels();
-                else
-                {
-                    string s = "";
-                    var l = w.GetLabels();
-                    foreach (var k in l.Keys)
-                        s += l[k] * 100 + "% " + k + "\r\n";
-                    labelsText.Text = s;
-                }
+
                 matchGrid.DataSource = w.GetMatches();
+                labelGrid.DataSource = w.GetLabels();
                 if (!w.HasRetrievedMatches())
                     await w.RetrieveMatches();
                 else
                 {
                     var s = w.GetSelectedMatchIndex();
-
-                    foreach (DataGridViewRow row in matchGrid.Rows)
-                        row.Selected = row.Index == s;
+                    await SetSelectedMatch(s);
                 }
                 SetStatus("Idle");
             }
@@ -104,11 +100,13 @@ namespace Freefy
                         SetStatus("Scraping Image...");
                         iw = new ImageWrapper(url);
                         Cache.Stash(url, iw);
+                        SetStatus("Idle");
+
                     }
                     else SetStatus("Cache hit!");
 
                     urls[index].AddChild(iw);
-
+                    iw.RecommendationMade += recMade;
                     await iw.RetrieveLabels();
                 }
                 else
@@ -123,7 +121,24 @@ namespace Freefy
                 }
                 imgList.DataSource = urls[index].GetChildren();
                 urlGrid.Enabled = imgList.Enabled = true;
-                SetStatus("Idle");                
+            }
+        }
+
+        private void recMade(URLWrapper sender)
+        {
+            if (selectedUrlIndex >= 0 && selectedUrlIndex < urls.Count)
+            {
+                var children = urls[selectedUrlIndex].GetChildren();
+                if (children != null)
+                {
+                    var iw = (ImageWrapper)sender;
+                    var idx = children.IndexOf(iw);
+                    if (idx >= 0 && idx == selectedImgIndex)
+                        Invoke(new MethodInvoker(async () =>
+                        {
+                            await SetSelectedMatch(iw.GetSelectedMatchIndex());
+                        }));
+                }
             }
         }
 
@@ -132,18 +147,24 @@ namespace Freefy
             SetStatus("Scraping Images...");
 
             Size minSize = new Size(Settings.Default.MinWidth, Settings.Default.MinHeight);
-            await ImageScraper.GetImageURLs(urls[index].URL, async (imgUrl, size) =>
+            ImageScraper.GetImageURLs(urls[index].URL, async (imgUrl, size) =>
             {
-                if (imgUrl == null || (size.Width > 0 && size.Width < minSize.Width) || (size.Height > 0 && size.Height < minSize.Height)) return;
+                if (imgUrl == null)
+                {
+                    SetStatus("Idle");
+                    return;
+                }
+                if ((size.Width > 0 && size.Width < minSize.Width) || (size.Height > 0 && size.Height < minSize.Height)) return;
                 ImageWrapper iw;
                 if (!Cache.Lookup(imgUrl, out iw))
                 {
                     iw = new ImageWrapper(imgUrl);
+                    iw.RecommendationMade += recMade;
                     Cache.Stash(imgUrl, iw);
                 }
                 await iw.RetrieveLabels();
                 await iw.RetrieveMatches();
-                urls[index].AddChild(iw);                
+                urls[index].AddChild(iw);
             });
         }
 
@@ -266,13 +287,13 @@ namespace Freefy
 
         public void LoadMissing()
         {
-            if(selectedUrlIndex >= 0 && selectedUrlIndex < urls.Count)
+            if (selectedUrlIndex >= 0 && selectedUrlIndex < urls.Count)
             {
                 var w = urls[selectedUrlIndex];
                 if (w.GetChildren() == null)
                     SetSelectedURL(selectedUrlIndex);
                 else
-                    foreach(var iw in w.GetChildren())
+                    foreach (var iw in w.GetChildren())
                     {
                         if (iw.GetLabels() == null)
                             iw.RetrieveLabels();
@@ -289,7 +310,7 @@ namespace Freefy
 
             taken.AddRange(matches.Select(iw => iw.FilePrefix));
 
-            string name = string.Join("_", original.GetLabels().Take(2).Select(x => x.Key));
+            string name = string.Join("_", original.GetLabels().Take(2).Select(x => x.Label));
 
             if (!taken.Contains(name))
                 return name;

@@ -16,13 +16,15 @@ namespace Freefy
             while (true)
                 lock (_lock)
                     if (!acquired)
+                    {
+                        acquired = true;
                         return;
+                    }
         }
 
         public void Release()
         {
-            lock (_lock)
-                acquired = false;
+            acquired = false;
         }
     }
 }

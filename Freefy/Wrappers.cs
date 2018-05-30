@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Utilities;
 
@@ -38,7 +39,7 @@ namespace Freefy
             URL = url;
         }
 
-        internal void ClearChildren()
+        public void ClearChildren()
         {
             children = null;
             ChildrenUpdated?.Invoke(this);
@@ -51,7 +52,7 @@ namespace Freefy
             return children;
         }
 
-        internal void AddChild(ImageWrapper w)
+        public void AddChild(ImageWrapper w)
         {
             if (children == null)
                 children = new BindingList<ImageWrapper>();
@@ -64,6 +65,8 @@ namespace Freefy
     {
         public event WrapperUpdatedEventHandler ImageUpdated;
         public event WrapperUpdatedEventHandler SimilarFound;
+        public event WrapperUpdatedEventHandler RecommendationMade;
+        public event WrapperUpdatedEventHandler LabelsRetrieved;
 
         static int P_DIM = 80;
 
@@ -71,7 +74,8 @@ namespace Freefy
 
         public Image ImagePreview { get; private set; }
 
-        private Dictionary<string, double> labels;
+        bool labelsRetrieved = false;
+        private BindingList<ImageLabel> labels = new BindingList<ImageLabel>();
 
         bool similarRetrieved = false;
         private BindingList<ImageWrapper> matches = new BindingList<ImageWrapper>();
@@ -88,46 +92,68 @@ namespace Freefy
             retrievingLabels = true;
             try
             {
+                Dictionary<string, double> r = null;
                 if (Labeler.PreferredMethod == Labeler.Method.ByUrl)
-                    labels = await Labeler.GetLabelsAsync(URL);
+                    r = await Labeler.GetLabelsAsync(URL);
                 else if (img != null)
-                    labels = await Labeler.GetLabelsAsync(img);
+                    r = await Labeler.GetLabelsAsync(img);
 
-                if (labels != null)
-                    labels = labels.OrderByDescending(kv => kv.Value)
+                if (r != null)
+                {
+                    r = r.OrderByDescending(kv => kv.Value)
                         .Take(Settings.Default.NFirstLabels)
                         .ToDictionary(kv => kv.Key, kv => kv.Value);
+                    foreach (var keyvalue in r)
+                    {
+                        labels.Add(new ImageLabel(keyvalue.Key, keyvalue.Value));
+                    }
+                    labelsRetrieved = true;
+                    LabelsRetrieved?.Invoke(this);
+                }
             }
             catch (Exception ex) { Reporter.Report(ex); }
             finally { retrievingLabels = false; }
         }
+
+        internal bool HasRetrievedLabels()
+        {
+            return labelsRetrieved;
+        }
+
         public async Task RetrieveMatches()
         {
             while (retrievingLabels) ;
             if (retrievingSimilar || labels == null) return;
             retrievingSimilar = true;
-            await ImageLookup.GetSimilar(labels.Keys.ToArray(), async (imgUrl, size) =>
-            {
-                if (imgUrl == null)
-                {
-                    similarRetrieved = true;
-                                    
-                    if (Labeler.CurrentLabeler.CanRecommend)
-                        SetSelectedMatch(await Labeler.GetRecommended(img, matches.Take(Settings.Default.RecCap).Select(i=>i.GetFullImage()).ToArray()));
+            await ImageLookup.GetSimilar(labels.Select(l => l.Label).ToArray(), async (imgUrl, size) =>
+             {
+                 if (imgUrl == null)
+                 {
+                     similarRetrieved = true;
 
-                    retrievingSimilar = false;
-                    return;
-                }
+                     if (Labeler.CurrentLabeler.CanRecommend)
+                     {
+                         var thread = new Thread(() => {
+                             var r = Labeler.GetRecommended(img, matches.Take(Settings.Default.RecCap).Select(i => i.GetFullImage()).ToArray()).Result;
+                             SetSelectedMatch(r);
+                             RecommendationMade?.Invoke(this);
+                             });
+                         thread.Start();
+                     }
+
+                     retrievingSimilar = false;
+                     return;
+                 }
                 //if (size.Width < Settings.Default.MinWidth && size.Height < Settings.Default.MinHeight) return;
                 ImageWrapper iw;
-                if (!Cache.Lookup(imgUrl, out iw))
-                {
-                    iw = new ImageWrapper(imgUrl);
-                    Cache.Stash(imgUrl, iw);
-                }
-                matches.Add(iw);
-                SimilarFound?.Invoke(this);
-            });
+                 if (!Cache.Lookup(imgUrl, out iw))
+                 {
+                     iw = new ImageWrapper(imgUrl);
+                     Cache.Stash(imgUrl, iw);
+                 }
+                 matches.Add(iw);
+                 SimilarFound?.Invoke(this);
+             });
         }
         public ImageWrapper(string url, Image img) : base(url)
         {
@@ -146,7 +172,7 @@ namespace Freefy
             return img.GetThumbnailImage(w, h, null, IntPtr.Zero);
         }
 
-        public Dictionary<string, double> GetLabels()
+        public BindingList<ImageLabel> GetLabels()
         {
             return labels;
         }
@@ -198,12 +224,12 @@ namespace Freefy
             }
         }
 
-        internal BindingList<ImageWrapper> GetMatches()
+        public BindingList<ImageWrapper> GetMatches()
         {
             return matches;
         }
 
-        internal bool HasRetrievedMatches()
+        public bool HasRetrievedMatches()
         {
             return similarRetrieved;
         }
@@ -219,9 +245,23 @@ namespace Freefy
                 selectedMatch = idx;
         }
 
-        internal ImageWrapper GetSelectedMatch()
+        public ImageWrapper GetSelectedMatch()
         {
             return matches[selectedMatch];
         }
+    }
+
+    public class ImageLabel
+    {
+        private double value;
+
+        public ImageLabel(string key, double value)
+        {
+            Label = key;
+            this.value = value;
+        }
+
+        public string Label { get; set; }
+        public string Confidence { get { return (value*100).ToString("0.00") + "%"; } }
     }
 }

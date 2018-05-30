@@ -60,8 +60,8 @@
             this.matchGrid = new System.Windows.Forms.DataGridView();
             this.splitContainerTop = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.labelsText = new System.Windows.Forms.RichTextBox();
             this.imgPrev = new System.Windows.Forms.PictureBox();
+            this.labelGrid = new System.Windows.Forms.DataGridView();
             this.statusStrip.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.urlGrid)).BeginInit();
@@ -83,6 +83,7 @@
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imgPrev)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.labelGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip
@@ -437,7 +438,7 @@
             // 
             // splitContainer2.Panel1
             // 
-            this.splitContainer2.Panel1.Controls.Add(this.labelsText);
+            this.splitContainer2.Panel1.Controls.Add(this.labelGrid);
             this.splitContainer2.Panel1.Controls.Add(this.imgPrev);
             // 
             // splitContainer2.Panel2
@@ -447,18 +448,6 @@
             this.splitContainer2.SplitterDistance = 271;
             this.splitContainer2.TabIndex = 8;
             // 
-            // labelsText
-            // 
-            this.labelsText.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.labelsText.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelsText.ForeColor = System.Drawing.Color.Lime;
-            this.labelsText.Location = new System.Drawing.Point(0, 0);
-            this.labelsText.Name = "labelsText";
-            this.labelsText.ReadOnly = true;
-            this.labelsText.Size = new System.Drawing.Size(271, 71);
-            this.labelsText.TabIndex = 1;
-            this.labelsText.Text = "";
-            // 
             // imgPrev
             // 
             this.imgPrev.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -467,6 +456,19 @@
             this.imgPrev.Size = new System.Drawing.Size(271, 202);
             this.imgPrev.TabIndex = 0;
             this.imgPrev.TabStop = false;
+            // 
+            // labelGrid
+            // 
+            this.labelGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.labelGrid.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.labelGrid.BackgroundColor = System.Drawing.Color.Black;
+            this.labelGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.labelGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelGrid.GridColor = System.Drawing.Color.Lime;
+            this.labelGrid.Location = new System.Drawing.Point(0, 0);
+            this.labelGrid.Name = "labelGrid";
+            this.labelGrid.Size = new System.Drawing.Size(271, 71);
+            this.labelGrid.TabIndex = 1;
             // 
             // MainFrm
             // 
@@ -509,6 +511,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imgPrev)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.labelGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -545,10 +548,10 @@
         private System.Windows.Forms.PictureBox matchPrev;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton sveURLBtn;
-        private System.Windows.Forms.RichTextBox labelsText;
         private System.Windows.Forms.ToolStripButton loadMissing;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton settingsBtn;
+        private System.Windows.Forms.DataGridView labelGrid;
     }
 }
 
