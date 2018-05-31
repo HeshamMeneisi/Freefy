@@ -17,9 +17,10 @@ namespace Freefy
         public static async Task GetSimilar(string[] labels, Action<string, Size> callback)
         {
             string urlQuery = HttpUtility.UrlEncode(String.Join(" ", labels));
+
             string url = String.Format(Settings.Default.LookupQuery, urlQuery);
 
-            ImageScraper.GetImageURLs(url, callback);
+            await ImageScraper.GetImageURLs(url, callback);
         }
     }
 }

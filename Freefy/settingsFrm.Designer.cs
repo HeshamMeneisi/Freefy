@@ -39,6 +39,9 @@
             this.label5 = new System.Windows.Forms.Label();
             this.LQTxt = new System.Windows.Forms.TextBox();
             this.saveBtn = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.filenameLabels = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.filenameLabels)).BeginInit();
             this.SuspendLayout();
             // 
             // labelerCombo
@@ -126,7 +129,7 @@
             // saveBtn
             // 
             this.saveBtn.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.saveBtn.Location = new System.Drawing.Point(0, 151);
+            this.saveBtn.Location = new System.Drawing.Point(0, 183);
             this.saveBtn.Name = "saveBtn";
             this.saveBtn.Size = new System.Drawing.Size(284, 23);
             this.saveBtn.TabIndex = 3;
@@ -134,11 +137,29 @@
             this.saveBtn.UseVisualStyleBackColor = true;
             this.saveBtn.Click += new System.EventHandler(this.saveBtn_Click);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(15, 149);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(82, 13);
+            this.label6.TabIndex = 4;
+            this.label6.Text = "File name labels";
+            // 
+            // filenameLabels
+            // 
+            this.filenameLabels.Location = new System.Drawing.Point(124, 147);
+            this.filenameLabels.Name = "filenameLabels";
+            this.filenameLabels.Size = new System.Drawing.Size(148, 20);
+            this.filenameLabels.TabIndex = 5;
+            // 
             // settingsFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 174);
+            this.ClientSize = new System.Drawing.Size(284, 206);
+            this.Controls.Add(this.filenameLabels);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.LQTxt);
             this.Controls.Add(this.CAPITxt);
@@ -153,6 +174,7 @@
             this.Name = "settingsFrm";
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.settingsFrm_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.filenameLabels)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -171,5 +193,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox LQTxt;
         private System.Windows.Forms.Button saveBtn;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.NumericUpDown filenameLabels;
     }
 }

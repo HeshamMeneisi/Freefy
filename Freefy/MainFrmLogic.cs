@@ -35,7 +35,7 @@ namespace Freefy
             }
         }
 
-        private async Task SetSelectedMatch(int index)
+        private async Task SetSelectedMatch(int index, bool grid=false)
         {
             matchGrid.Enabled = false;
             var matches = urls[selectedUrlIndex].GetChildren()[selectedImgIndex].GetMatches();
@@ -45,9 +45,11 @@ namespace Freefy
                 matchPrev.Image = m.GetThumb(matchPrev.Width, matchPrev.Height);
                 selectedMatchIndex = index;
 
+                
                 foreach (DataGridViewRow row in matchGrid.Rows)
                     row.Selected = row.Index == index;
-
+                if (!grid)
+                    matchGrid.FirstDisplayedScrollingRowIndex = matchGrid.SelectedRows[0].Index;
                 pickMatch.Enabled = true;
             }
             matchGrid.Enabled = true;

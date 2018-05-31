@@ -128,7 +128,7 @@ namespace Freefy
         private async void matchGrid_SelectionChanged(object sender, EventArgs e)
         {
             if (matchGrid.SelectedRows.Count == 1)
-                await SetSelectedMatch(matchGrid.SelectedRows[0].Index);
+                await SetSelectedMatch(matchGrid.SelectedRows[0].Index, true);
         }
 
         private void pickMatch_Click(object sender, EventArgs e)

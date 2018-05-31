@@ -121,13 +121,25 @@ namespace Freefy.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
         public int RecCap {
             get {
                 return ((int)(this["RecCap"]));
             }
             set {
                 this["RecCap"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int FileNameLabels {
+            get {
+                return ((int)(this["FileNameLabels"]));
+            }
+            set {
+                this["FileNameLabels"] = value;
             }
         }
     }

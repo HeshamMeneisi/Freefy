@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities;
@@ -81,6 +82,25 @@ namespace Freefy
         private BindingList<ImageWrapper> matches = new BindingList<ImageWrapper>();
         private int selectedMatch = 0;
 
+        private static string[] wordBlackList = new string[]
+        {
+            "compressed","compress","auto","big","medium","small","large","jpeg","jpg","png","bmp","gif",
+            "tinysrgb","rgb","argb","srgb","gallery","horizontal","vertical", "body", "story", "copyright",
+            "pexels", "photo", "http", "com", "net", "org", "cnn", "bbc", "fcdn", "fdam", "fcnnnext", "fassets"
+        };
+        public string FileLabels
+        {
+            get
+            {
+                string l = "";
+                string fname = URL.Split('/').Last();
+                foreach (Match m in Regex.Matches(fname.ToLower(), "(^|[^a-zA-Z])([a-zA-z]{3,8})([^a-zA-Z]|$)"))
+                    if (!wordBlackList.Contains(m.Groups[2].Value))
+                        l += m.Groups[2].Value + " ";
+                return l.Trim();
+            }
+        }
+
         public ImageWrapper(string url) : base(url)
         {
             RetrieveImage();
@@ -125,7 +145,26 @@ namespace Freefy
             while (retrievingLabels) ;
             if (retrievingSimilar || labels == null) return;
             retrievingSimilar = true;
-            await ImageLookup.GetSimilar(labels.Select(l => l.Label).ToArray(), async (imgUrl, size) =>
+            var list = new List<string>();
+            list.AddRange(labels.Select(l => l.Label));
+            bool skip = false;
+            var flist = new List<string>();
+            foreach (string fl in FileLabels.Split(' ').Take(Settings.Default.FileNameLabels))
+            {
+                foreach (string label in list)
+                    if (label.Contains(fl))
+                    {
+                        skip = true;
+                        break;
+                    }
+                if (skip)
+                    break;
+                flist.Add(fl);
+            }
+            if (!skip)
+                list.AddRange(flist);
+
+            await ImageLookup.GetSimilar(list.ToArray(), async (imgUrl, size) =>
              {
                  if (imgUrl == null)
                  {
@@ -133,19 +172,20 @@ namespace Freefy
 
                      if (Labeler.CurrentLabeler.CanRecommend)
                      {
-                         var thread = new Thread(() => {
+                         var thread = new Thread(() =>
+                         {
                              var r = Labeler.GetRecommended(img, matches.Take(Settings.Default.RecCap).Select(i => i.GetFullImage()).ToArray()).Result;
                              SetSelectedMatch(r);
                              RecommendationMade?.Invoke(this);
-                             });
+                         });
                          thread.Start();
                      }
 
                      retrievingSimilar = false;
                      return;
                  }
-                //if (size.Width < Settings.Default.MinWidth && size.Height < Settings.Default.MinHeight) return;
-                ImageWrapper iw;
+                 //if (size.Width < Settings.Default.MinWidth && size.Height < Settings.Default.MinHeight) return;
+                 ImageWrapper iw;
                  if (!Cache.Lookup(imgUrl, out iw))
                  {
                      iw = new ImageWrapper(imgUrl);
@@ -262,6 +302,6 @@ namespace Freefy
         }
 
         public string Label { get; set; }
-        public string Confidence { get { return (value*100).ToString("0.00") + "%"; } }
+        public string Confidence { get { return (value * 100).ToString("0.00") + "%"; } }
     }
 }

@@ -55,6 +55,7 @@ namespace Freefy
             serverTxt.Text = Settings.Default.ServerHost;
             CAPITxt.Text = Settings.Default.ClarifaiAPIKey;
             LQTxt.Text = Settings.Default.LookupQuery;
+            filenameLabels.Value = Settings.Default.FileNameLabels;
         }
 
         private void saveBtn_Click(object sender, EventArgs e)
@@ -64,6 +65,8 @@ namespace Freefy
             Settings.Default.ServerHost = serverTxt.Text;
             Settings.Default.ClarifaiAPIKey = CAPITxt.Text;
             Settings.Default.LookupQuery = LQTxt.Text;
+            Settings.Default.FileNameLabels = (int)filenameLabels.Value;
+
             Settings.Default.Save();
 
             Labeler.Reset();
